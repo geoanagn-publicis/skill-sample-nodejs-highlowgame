@@ -210,21 +210,23 @@ const NumberGuessIntent = {
     for (let i = 0; i < data.length; i++) {
         if (data[i].number == inputNum) {
             const order = data[i];
+            //save sessionAttributes to persistentAttributes
+            attributesManager.setPersistentAttributes(sessionAttributes);
             switch (true) {
 				case (order.status == 1):
 					return handlerInput.responseBuilder
-					.speak(FILLING_INFO_MSG + order.estimatedDate)
+					.speak(FILLING_INFO_MSG + order.estimatedDate);
 					//.reprompt(requestAttributes.t('TOO_HIGH_REPROMPT'))
 					/*.getResponse()*/;
 				case (order.status == 2):
 					return handlerInput.responseBuilder
-					.speak(requestAttributes.t('SHIPPED_INFO_MSG', inputNum.toString()));
+					.speak(SHIPPED_INFO_MSG + order.estimatedDate);
 				case (order.status == 3):
 					return handlerInput.responseBuilder
-					.speak(requestAttributes.t('DELIVERED_INFO_MSG', inputNum.toString()));
+					.speak(DELIVERED_INFO_MSG + order.estimatedDate);
 				case (order.status == 4):
 					return handlerInput.responseBuilder
-					.speak(requestAttributes.t('CANCELED_INFO_MSG', inputNum.toString()));
+					.speak(CANCELED_INFO_MSG + order.estimatedDate);
             }
         }
     }
