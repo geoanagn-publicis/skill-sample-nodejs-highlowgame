@@ -215,18 +215,24 @@ const NumberGuessIntent = {
             switch (true) {
 				case (order.status == 1):
 					return handlerInput.responseBuilder
-					.speak(FILLING_INFO_MSG + order.estimatedDate);
-					//.reprompt(requestAttributes.t('TOO_HIGH_REPROMPT'))
-					/*.getResponse()*/;
+					.speak(FILLING_INFO_MSG + order.estimatedDate)
+					.reprompt(requestAttributes.t('TOO_HIGH_REPROMPT'))
+					.getResponse();
 				case (order.status == 2):
 					return handlerInput.responseBuilder
-					.speak(SHIPPED_INFO_MSG + order.estimatedDate);
+					.speak(SHIPPED_INFO_MSG + order.estimatedDate)
+					.reprompt(requestAttributes.t('GUESS_CORRECT_REPROMPT'))
+					.getResponse();
 				case (order.status == 3):
 					return handlerInput.responseBuilder
-					.speak(DELIVERED_INFO_MSG + order.estimatedDate);
+					.speak(DELIVERED_INFO_MSG + order.estimatedDate)
+					.reprompt(requestAttributes.t('GUESS_CORRECT_REPROMPT'))
+					.getResponse();
 				case (order.status == 4):
 					return handlerInput.responseBuilder
-					.speak(CANCELED_INFO_MSG + order.estimatedDate);
+					.speak(CANCELED_INFO_MSG + order.estimatedDate)
+					.reprompt(requestAttributes.t('GUESS_CORRECT_REPROMPT'))
+					.getResponse();
             }
         }
     }
