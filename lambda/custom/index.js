@@ -1,3 +1,4 @@
+//ALEXA-DOC: http://ask-sdk-java-javadocs.s3-website-us-west-2.amazonaws.com/com/amazon/ask/attributes/AttributesManager.html ; https://ask-sdk-for-nodejs.readthedocs.io/en/latest/Building-Response.html
 // Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // Licensed under the Amazon Software License
 // http://aws.amazon.com/asl/
@@ -16,6 +17,16 @@ const FALLBACK_MESSAGE_DURING_GAME = `The ${SKILL_NAME} skill can't help you wit
 const FALLBACK_REPROMPT_DURING_GAME = 'Please guess a number between 0 and 100.';
 const FALLBACK_MESSAGE_OUTSIDE_GAME = `The ${SKILL_NAME} skill can't help you with that.  It will come up with a number between 0 and 100 and you try to guess it by saying a number in that range. Would you like to play?`;
 const FALLBACK_REPROMPT_OUTSIDE_GAME = 'Say yes to start the game or no to quit.';
+
+const FILLING_INFO_MSG = 'Your order is being filled, and has an estimated delivery date of ';
+const SHIPPED_INFO_MSG = 'Your order is in shipping, and has an estimated delivery date of ';
+const DELIVERED_INFO_MSG = 'Your order was delivered on ';
+const CANCELED_INFO_MSG = 'Your order was has been cancled. For more information, please login to w w w dot optum dot com';
+
+const data=[
+	{number: "12345", estimatedDate: null, deliveredDate: "7/10/19", status: 1}, 
+	{number: "12346", estimatedDate: "7/12/19", deliveredDate: "null", status: 2}, 
+];
 
 
 const LaunchRequest = {
@@ -187,38 +198,62 @@ const NumberGuessIntent = {
   },
   async handle(handlerInput) {
     const { requestEnvelope, attributesManager, responseBuilder } = handlerInput;
-
-    const guessNum = parseInt(requestEnvelope.request.intent.slots.number.value, 10);
+    //get int from input
+    const inputNum = parseInt(requestEnvelope.request.intent.slots.number.value, 10);
+    //get session attributes
     const sessionAttributes = attributesManager.getSessionAttributes();
+    //identify the target number
     const targetNum = sessionAttributes.guessNumber;
+    //get the attibutes from the request
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-
-
-    if (guessNum > targetNum) {
-      return handlerInput.responseBuilder
-        .speak(requestAttributes.t('TOO_HIGH_MESSAGE', guessNum.toString()))
-        .reprompt(requestAttributes.t('TOO_HIGH_REPROMPT'))
-        .getResponse();
-    } else if (guessNum < targetNum) {
-      return handlerInput.responseBuilder
-        .speak(requestAttributes.t('TOO_LOW_MESSAGE', guessNum.toString()))
-        .reprompt(requestAttributes.t('TOO_LOW_REPROMPT'))
-        .getResponse();
-    } else if (guessNum === targetNum) {
-      sessionAttributes.gamesPlayed += 1;
-      sessionAttributes.gameState = 'ENDED';
-      attributesManager.setPersistentAttributes(sessionAttributes);
-      await attributesManager.savePersistentAttributes();
-      return handlerInput.responseBuilder
-        .speak(requestAttributes.t('GUESS_CORRECT_MESSAGE', guessNum.toString()))
-        .reprompt(requestAttributes.t('GUESS_CORRECT_REPROMPT'))
-        .getResponse();
+    
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].number == inputNum) {
+            const order = data[i];
+            switch (true) {
+				case (order.status == 1):
+					return handlerInput.responseBuilder
+					.speak(FILLING_INFO_MSG + order.estimatedDate)
+					//.reprompt(requestAttributes.t('TOO_HIGH_REPROMPT'))
+					/*.getResponse()*/;
+				case (order.status == 2):
+					return handlerInput.responseBuilder
+					.speak(requestAttributes.t('SHIPPED_INFO_MSG', inputNum.toString()));
+				case (order.status == 3):
+					return handlerInput.responseBuilder
+					.speak(requestAttributes.t('DELIVERED_INFO_MSG', inputNum.toString()));
+				case (order.status == 4):
+					return handlerInput.responseBuilder
+					.speak(requestAttributes.t('CANCELED_INFO_MSG', inputNum.toString()));
+            }
+        }
     }
+    
+    // if (guessNum > targetNum) {
+    //   return handlerInput.responseBuilder
+    //     .speak(requestAttributes.t('TOO_HIGH_MESSAGE', guessNum.toString()))
+    //     .reprompt(requestAttributes.t('TOO_HIGH_REPROMPT'))
+    //     .getResponse();
+    // } else if (guessNum < targetNum) {
+    //   return handlerInput.responseBuilder
+    //     .speak(requestAttributes.t('TOO_LOW_MESSAGE', guessNum.toString()))
+    //     .reprompt(requestAttributes.t('TOO_LOW_REPROMPT'))
+    //     .getResponse();
+    // } else if (guessNum === targetNum) {
+    //   sessionAttributes.gamesPlayed += 1;
+    //   sessionAttributes.gameState = 'ENDED';
+    //   attributesManager.setPersistentAttributes(sessionAttributes);
+    //   await attributesManager.savePersistentAttributes();
+    //   return handlerInput.responseBuilder
+    //     .speak(requestAttributes.t('GUESS_CORRECT_MESSAGE', guessNum.toString()))
+    //     .reprompt(requestAttributes.t('GUESS_CORRECT_REPROMPT'))
+    //     .getResponse();
+    // }
     return handlerInput.responseBuilder
       .speak(requestAttributes.t('FALLBACK_MESSAGE_DURING_GAME'))
       .reprompt(requestAttributes.t('FALLBACK_REPROMPT_DURING_GAME'))
       .getResponse();
-  },
+  }
 };
 
 const ErrorHandler = {
